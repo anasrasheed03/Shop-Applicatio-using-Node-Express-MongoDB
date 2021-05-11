@@ -1,0 +1,37 @@
+extends layouts/main-layout.pug
+block content 
+    main
+            if prods.length > 0
+                .grid
+                    each product in prods
+                        article.card.product-item
+                            header.card_header
+                                h1.product__title #{product.title}
+            else
+                h1 No Products
+
+//- doctype html
+//- html(lang="en")
+//-     head
+//-         meta(charset="UTF-8")
+//-         meta(http-equiv="X-UA-Compatible", content="IE=edge")
+//-         meta(name="viewport", content="width=device-width, initial-scale=1.0")
+//-         title #{docTitle}
+//-         link(rel="stylesheet", href="/css/main.css")
+//-     body 
+//-         header.main-header
+//-             nav.main-header__nav
+//-                 ul.main-header_list_item
+//-                     li.main-header_item
+//-                         a.active(href="/") Shop     
+//-                     li.main-header_item
+//-                         a(href="/admin/add-product") Add Product   
+//-         main
+//-             if prods.length > 0
+//-                 .grid
+//-                     each product in prods
+//-                         article.card.product-item
+//-                             header.card_header
+//-                                 h1.product__title #{product.title}
+//-             else
+//-                 h1 No Products

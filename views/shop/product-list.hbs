@@ -1,0 +1,21 @@
+    <main>
+       <h1>My Products</h1>
+       <p>List of all the product</p>
+       {{#if hasProducts}}
+       <div class="grid">
+           {{#each prods}}
+           <article class="card product-item">
+               <header class="card_header">
+                   <h1 class="product__title">
+                       {{this.title}}
+                   </h1>
+               </header>
+           </article> 
+           {{/each}}
+       </div>
+       {{else}}
+       <div>
+           <h1>No Products</h1>
+       </div>
+       {{/if}}
+    </main>
