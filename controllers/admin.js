@@ -1,4 +1,7 @@
 const Product = require('../models/product')
+const mongoDb = require('mongodb');
+
+const ObjectID = mongoDb.ObjectID;
 exports.getAddProduct = (req, res, next) => {
     // console.log("i'm the middleware")
     // res.send('<form action="/admin/add-product" method="POST"><input name="title" type="text"/><button type="submit">Add Product</button></form>')
@@ -31,14 +34,18 @@ exports.postProduct =(req, res, next) => {
     //     imageUrl:imageUrl,
     //     description:description
     // })
-    req.user.createProduct(
-        {
-                title:title,
-                price:price,
-                imageUrl:imageUrl,
-                description:description
-            }  
-    )
+    //sequelize way
+    // req.user.createProduct(
+    //     {
+    //             title:title,
+    //             price:price,
+    //             imageUrl:imageUrl,
+    //             description:description
+    //         }  
+    // )
+    //mongodb way
+    const product = new Product(title,imageUrl,price,description,null,req.user._id);
+    product.save()
     .then((result)=>{
         console.log(result)
         res.redirect('/admin/admin-product')
@@ -55,15 +62,28 @@ exports.getAdminProducts=(req,res,next)=>{
     
     //     })
     // });
-    req.user.getProducts().then(products=>{
+
+    //sequelize way
+    // req.user.getProducts().then(products=>{
     // Product.findAll().then((products=>{
+    //     res.render('admin/products',{
+    //         prods: products, 
+    //         docTitle:'Admin Products',
+    //         path:'/admin/admin-products'
+    
+    //     })
+    // });
+
+    //mongo way
+    Product.fetchAll()
+    .then((products=>{
         res.render('admin/products',{
             prods: products, 
             docTitle:'Admin Products',
             path:'/admin/admin-products'
     
         })
-    });
+    }));
 
    
       
@@ -76,6 +96,24 @@ exports.getEditProduct = (req, res, next) => {
       return res.redirect('/');
     }
     const prodId = req.params.productId;
+    console.log(prodId)
+    //mongodb way
+    Product.findById(prodId)
+    .then(
+        product=>{
+            console.log('runs')
+            console.log(product)
+            res.render('admin/edit-product', {
+                    docTitle: 'Edit Product',
+                    path: '/admin/edit-product',
+                    editing: editMode,
+                    product: product
+                  });
+        }
+    )
+    .catch(err=>{console.log(err)})
+
+    //sequelize way
     // Product.findByPk(prodId, product => {
     //   if (!product) {
     //     return res.redirect('/');
@@ -87,18 +125,18 @@ exports.getEditProduct = (req, res, next) => {
     //     product: product
     //   });
     // });
-    req.user.getProducts({where:{id:prodId}})
+    // req.user.getProducts({where:{id:prodId}})
     // Product.findByPk(prodId)
-    .then(
-        (product)=>{
-            res.render('admin/edit-product', {
-                docTitle: 'Edit Product',
-                    path: '/admin/edit-product',
-                    editing: editMode,
-                    product: product
-                  });
-        }
-    ).catch(err=>console.log(err));
+    // .then(
+    //     (product)=>{
+    //         res.render('admin/edit-product', {
+    //             docTitle: 'Edit Product',
+    //                 path: '/admin/edit-product',
+    //                 editing: editMode,
+    //                 product: product
+    //               });
+    //     }
+    // ).catch(err=>console.log(err));
   };
   
   exports.postEditProduct = (req, res, next) => {
@@ -107,21 +145,29 @@ exports.getEditProduct = (req, res, next) => {
     const updatedPrice = req.body.price;
     const updatedImageUrl = req.body.imageUrl;
     const updatedDesc = req.body.description;
-    Product.findByPk(prodId).then(
-        product=>{
-            product.title= updatedTitle;
-            product.price = updatedPrice;
-            product.imageUrl = updatedImageUrl;
-            product.description = updatedDesc;
-            return product.save();
-        }
-    )
+    console.log('prodId',prodId)
+
+    const prd = new Product(updatedTitle,updatedImageUrl,updatedPrice,updatedDesc,new ObjectID(prodId))
+    prd.save()
     .then(result=>{
     res.redirect('/admin/admin-product');
-
-        console.log('Updated Porduct')
     })
-    .catch(err=>console.log(err))
+    //sequelize way
+    // Product.findByPk(prodId).then(
+    //     product=>{
+    //         product.title= updatedTitle;
+    //         product.price = updatedPrice;
+    //         product.imageUrl = updatedImageUrl;
+    //         product.description = updatedDesc;
+    //         return product.save();
+    //     }
+    // )
+    // .then(result=>{
+    // res.redirect('/admin/admin-product');
+
+    //     console.log('Updated Porduct')
+    // })
+    // .catch(err=>console.log(err))
     // const updatedProduct = new Product(
     //   prodId,
     //   updatedTitle,
@@ -134,13 +180,26 @@ exports.getEditProduct = (req, res, next) => {
 
 
 exports.postDeleteProduct = (req, res, next) => {
+    console.log('reqid',req.body.productId);
     const prodId = req.body.productId;
     // Product.deleteById(prodId);
-    Product.findByPk(prodId).then(
-        product=>{
-            product.destroy();
-        }
-    )
+    //sequelize way
+    // Product.findByPk(prodId).then(
+    //     product=>{
+    //         product.destroy();
+    //     }
+    // )
+    // .then(
+    //     result=>{
+    //         console.log('deleted')
+    // res.redirect('/admin/admin-product');
+            
+    //     }
+    // )
+    // .catch(err=>console.log(err));
+
+    //mongdb methond
+    Product.deleteById(prodId)
     .then(
         result=>{
             console.log('deleted')
